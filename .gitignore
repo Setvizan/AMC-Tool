@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+# VS2019
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# media
+*/media/
+*/x64/
+
