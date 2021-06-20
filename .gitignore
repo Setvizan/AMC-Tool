@@ -36,8 +36,9 @@
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+*.vs/
+*x64/
 
 # media
-*/media/
-*/x64/
+*media/
 
