@@ -28,35 +28,47 @@ std::string convertFrames(cv::Mat frame) {
 }
 
 int main() {
+
+	using std::chrono::high_resolution_clock;
+	using std::chrono::duration;
+
+
 	cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
-	const std::string path = "C:\\Projects\\CPP\\.github\\AMC-Tool\\TST_2\\videoascii\\media\\oddloop.mp4";
+	const std::string path = "C:\\Projects\\CPP\\.github\\AMC-Tool\\TST_2\\videoascii\\media\\worldonfire.mp4";
 	cv::VideoCapture cam = cv::VideoCapture(path);
 	int frameCount = 1, lastProgressCP = 0;
-	const int TOTAL_FRAMES = cam.get(cv::CAP_PROP_FRAME_COUNT);
-
+	const int FRAME_COUNT = cam.get(cv::CAP_PROP_FRAME_COUNT);
+	const int FRAME_HEIGHT = cam.get(cv::CAP_PROP_FRAME_HEIGHT) * .2;
+	const int FRAME_WIDTH = cam.get(cv::CAP_PROP_FRAME_WIDTH) * .2;
+	std::string cmd = "MODE " + std::to_string(FRAME_WIDTH * 2) + "," + std::to_string(FRAME_HEIGHT);
 	if (cam.isOpened()) {
 		std::cout << "FPS: " << cam.get(cv::CAP_PROP_FPS) << std::endl;
+		std::cout << "FRAME_COUNT: " << FRAME_COUNT << std::endl;
 		std::vector<std::string> frames;
 		cv::Mat frame;
 		while (cam.read(frame)) {
 			cv::resize(frame, frame, cv::Size(), .2, .2);
-			imshow("Frame", frame);
+			
 			frames.push_back(convertFrames(frame));
-
+			/*
+			imshow("Frame", frame);
 			char c = (char)cv::waitKey(25);
 			if (c == 27) {
 				std::cout << "EXITED PROCESS - PROCESS CANCELLED";
 				break;
 			}
-
-			const int progress = ++frameCount * 100 / TOTAL_FRAMES;
+			*/
+			const int progress = ++frameCount * 100 / FRAME_COUNT;
 			if (progress % 10 == 0 && progress / 10 != lastProgressCP)
 			{
 				lastProgressCP = progress / 10;
 				std::cout << progress << "%\n";
 			}
 		}
+		//testing output -> clearly not formatted :)
+		system(cmd.c_str());
+		for (auto& it : frames) {
+			std::cout << it;
+		}
 	}
-
-			
 }
