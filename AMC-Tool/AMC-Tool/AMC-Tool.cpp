@@ -1,13 +1,22 @@
 #include <iostream>
+#include <filesystem> //C++ 17 only!
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/video.hpp>
 #include <opencv2/core/utils/logger.hpp>
 
+/*
+author: Nino Arisona (Setvizan)
+language: c++ 17
+libraries: pre-built opencv 4.5.2
+made in: juli 2021
+desc: convert your regular .mp4 files to a ascii movies.
+*/
 
 
-cv::Mat convFrame(cv::Mat frame) {
+
+cv::Mat convFrame(const cv::Mat& frame) {
 	std::string char_arr[10] = { " ", ".", ":", "-", "=", "+", "*", "#", "%", "@" };
 	uint8_t* pxAcc = (uint8_t*)frame.data;
 	int cn = frame.channels();
@@ -32,15 +41,34 @@ cv::Mat convFrame(cv::Mat frame) {
 	return blank;
 }
 
-int main() {
 
+bool validate(const std::string path) {
+	std::cout << "starting validation...\n";
+	if (!std::filesystem::exists(path)) {
+		std::cout << "file doesn't exist!\n";
+		return false;
+	}
+	else if (std::filesystem::path(path).extension() != ".mp4") {
+		std::cout << "wrong file type! (use .mp4)\n";
+		return false;
+	}
+	else {
+		return true;
+	}
+	std::cout << "validation complete!\n";
+}
+
+
+
+int main() {
 	//silent logs - opencv infos for external libraries
 	cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
 
-	const std::string path = "C:\\Projects\\CPP\\.github\\AMC-Tool\\AMC-Tool\\AMC-Tool\\media\\rick.mp4";
+	const std::string path = "C:\\Projects\\CPP\\.github\\AMC-Tool\\AMC-Tool\\AMC-Tool\\media\\rick";
+
+	if (!validate(path)) {return -1;}
 
 	cv::VideoCapture cam = cv::VideoCapture(path);
-	
 	int frameCount = 1, lastProgressCP = 0;
 	if (cam.isOpened()) {
 		//information variables
@@ -52,9 +80,7 @@ int main() {
 		int FCC = static_cast<int>(cam.get(cv::CAP_PROP_FOURCC));
 		double FPS = cam.get(cv::CAP_PROP_FPS);
 		cv::VideoWriter videowriter;
-		
 
-		
 		//read variables
 		cv::Mat frame;
 		
@@ -84,6 +110,7 @@ int main() {
 			}
 		}
 		cam.release();
-		videowriter.release();		
+		videowriter.release();	
+		return 0;
 	}
 }
