@@ -32,10 +32,10 @@
 *.app
 
 # VS2019
-*.sln
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
+#*.sln
+#*.vcxproj
+#*.vcxproj.filters
+#*.vcxproj.user
 *.vs/
 *x64/
 
