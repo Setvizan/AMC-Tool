@@ -1,11 +1,3 @@
-#include <iostream>
-#include <filesystem> //C++ 17 only!
-#include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/video.hpp>
-#include <opencv2/core/utils/logger.hpp>
-
 /*
 author: Nino Arisona (Setvizan)
 language: c++ 17
@@ -14,103 +6,134 @@ made in: juli 2021
 desc: convert your regular .mp4 files to a ascii movies.
 */
 
+#include <iostream>
+#include <filesystem> //C++ 17 only!
+#include <opencv2/videoio.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/video.hpp>
+#include <opencv2/core/utils/logger.hpp>
 
 
-cv::Mat convFrame(const cv::Mat& frame) {
-	std::string char_arr[10] = { " ", ".", ":", "-", "=", "+", "*", "#", "%", "@" };
-	uint8_t* pxAcc = (uint8_t*)frame.data;
-	int cn = frame.channels();
+// defines how much the input frame is down scaled
+const double scale_factor = 0.2;
 
-	cv::Mat blank = cv::Mat::zeros(cv::Size(frame.cols * 10, frame.rows * 10), CV_8UC3);
+// the character size in pixels
+const int character_size = 10;
+
+// font character size
+const double font_size = 0.4;
+
+
+cv::Mat convert_frame(const cv::Mat frame) {
+	cv::String character_map[10] = { " ", ".", ":", "-", "=", "+", "*", "#", "%", "@" }; // not const because of qualification
+	const uint8_t* frame_data = (uint8_t*)frame.data;
+	int ch = frame.channels(); // channels
+
+	cv::Mat output = cv::Mat::zeros(cv::Size(frame.cols * character_size, frame.rows * character_size), CV_8UC3);
 
 	for (int y = 0, height = frame.rows, width = frame.cols; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			cv::Scalar_<uint8_t> px;
+			cv::Scalar_<uint8_t> px; // pixel
 			
-			px.val[0] = pxAcc[y * width * cn + x * cn + 0]; // B
-			px.val[1] = pxAcc[y * width * cn + x * cn + 1]; // G
-			px.val[2] = pxAcc[y * width * cn + x * cn + 2]; // R
+			px.val[0] = frame_data[y * width * ch + x * ch + 0]; // B
+			px.val[1] = frame_data[y * width * ch + x * ch + 1]; // G
+			px.val[2] = frame_data[y * width * ch + x * ch + 2]; // R
 			
-			//calculation by luminosity
+			// calculation by luminosity
 			float lumiosity = (0.299 * px.val[2] + 0.587 * px.val[1] + 0.114 * px.val[0]);
-			std::string ascii = char_arr[(int)(lumiosity * 0.03921)];
+			cv::String& character = character_map[(int)(lumiosity * 0.03921)];
 
-			cv::putText(blank, ascii , cv::Point(x * 10, y * 10), cv::FONT_HERSHEY_COMPLEX, 0.4, cv::Scalar(255, 255, 255), 1); //90% of processing time
+			cv::putText(output, character , cv::Point(x * character_size, y * character_size), cv::FONT_HERSHEY_COMPLEX, font_size, cv::Scalar(255, 255, 255), 1); // 90% of processing time
 		}
 	}
-	return blank;
+	return output;
 }
 
 
 bool validate(const std::string path) {
-	std::cout << "starting validation...\n";
-	if (!std::filesystem::exists(path)) {
-		std::cout << "file doesn't exist!\n";
+	std::cout << "starting validation..." << std::endl;
+	if (path.empty()) {
+		std::cerr << "no arguments found usage: AMC-Tool PATH/TO/FILE" << std::endl;
 		return false;
-	}
-	else if (std::filesystem::path(path).extension() != ".mp4") {
-		std::cout << "wrong file type! (use .mp4)\n";
+	} else if (!std::filesystem::exists(path)) {
+		std::cerr << "file does not exist!" << std::endl;
 		return false;
-	}
-	else {
+	} else if (std::filesystem::path(path).extension() != ".mp4") {
+		std::cerr << "wrong file type! (use .mp4)\n";
+		return false;
+	} else {
+		std::cout << "validation complete!" << std::endl;
 		return true;
 	}
-	std::cout << "validation complete!\n";
+	
 }
 
 
-
-int main() {
-	//silent logs - opencv infos for external libraries
+int main(int argc, char *argv[]) {
+	// silent logs - opencv infos for external libraries
 	cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+	if (!validate(argv[1])) { return -1; }
+	const std::string path = argv[1];
+	const std::string new_filename = std::filesystem::path(argv[1]).stem().string() + "_ascii.mp4";
+	const std::string output_path = std::filesystem::path(argv[1]).replace_filename(new_filename).string();
+	std::cout << output_path << std::endl;
+	int current_frame = 1;
+	int progress_checkpoint = 0;
 
-	const std::string path = "C:\\Projects\\CPP\\.github\\AMC-Tool\\AMC-Tool\\AMC-Tool\\media\\rick";
+	cv::VideoCapture video_capture;
+	if (!video_capture.open(path)) {
+		std::cerr << "could not open video capture" << std::endl;
+		video_capture.release();
+		return -1;
+	}
+	if (video_capture.isOpened()) {
+		// input information variables
+		int input_frame_count = video_capture.get(cv::CAP_PROP_FRAME_COUNT);
+		int input_frame_width = video_capture.get(cv::CAP_PROP_FRAME_WIDTH);
+		int input_frame_height = video_capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	if (!validate(path)) {return -1;}
+		// scaled and output frame sizes
+		cv::Size scaled_frame_size = cv::Size((int)(input_frame_width * scale_factor), (int)(input_frame_height * scale_factor));
+		cv::Size output_frame_size = cv::Size(scaled_frame_size.width * character_size, scaled_frame_size.height * character_size);
 
-	cv::VideoCapture cam = cv::VideoCapture(path);
-	int frameCount = 1, lastProgressCP = 0;
-	if (cam.isOpened()) {
-		//information variables
-		int FRAME_COUNT = cam.get(cv::CAP_PROP_FRAME_COUNT);
-		int FRAME_WIDTH = cam.get(cv::CAP_PROP_FRAME_WIDTH);
-		int FRAME_HEIGHT = cam.get(cv::CAP_PROP_FRAME_HEIGHT);
-		cv::Size s = cv::Size((int)(FRAME_WIDTH * .2) * 10, (int)(FRAME_HEIGHT * .2) * 10);
-		//videowriter variables
-		int FCC = static_cast<int>(cam.get(cv::CAP_PROP_FOURCC));
-		double FPS = cam.get(cv::CAP_PROP_FPS);
-		cv::VideoWriter videowriter;
+		// videowriter variables
+		int fourcc = static_cast<int>(video_capture.get(cv::CAP_PROP_FOURCC));
+		double fps = video_capture.get(cv::CAP_PROP_FPS);
 
-		//read variables
+		// read variables
 		cv::Mat frame;
 		
-		//output for clarity
-		std::cout << "FRAME_COUNT : " << FRAME_COUNT << "\n";
-		std::cout << "FRAME_HEIGHT : " << FRAME_HEIGHT << "\n";
-		std::cout << "FRAME_WIDTH : " << FRAME_WIDTH << "\n";
-		std::cout << "NEW FILE RESOLUTION: " << s.height << "x" << s.width << "\n";
+		// output for clarity
+		std::cout << "FRAME_COUNT : " << input_frame_count << "\n";
+		std::cout << "FRAME_WIDTH : " << input_frame_width << "\n";
+		std::cout << "FRAME_HEIGHT : " << input_frame_height << "\n";
+		std::cout << "NEW FILE RESOLUTION: " << output_frame_size.height << "x" << output_frame_size.width << "\n";
 
-		if (videowriter.open("C:\\Projects\\CPP\\.github\\AMC-Tool\\AMC-Tool\\AMC-Tool\\media\\rickroll.mp4", FCC, FPS, s, true)) {
+		cv::VideoWriter video_writer;
+		if (!video_writer.open(output_path, fourcc, fps, output_frame_size, true)) {
+			std::cerr << "could not open video writer" << std::endl;
+			video_capture.release();
+			video_writer.release();
+			return -1;
+		}
 
-			while (cam.read(frame)) {
-				if (frame.empty()) break;
+		while (video_capture.read(frame)) {
+			if (frame.empty()) break;
 				
-				cv::resize(frame, frame, cv::Size(), .2, .2);
+			cv::resize(frame, frame, scaled_frame_size);
 
-				//all_frames.push_back(readFrame(convertFrame(frame), FRAME_WIDTH * .2, FRAME_HEIGHT * .2));
-				videowriter.write(convFrame(frame));
+			video_writer.write(convert_frame(frame));
 
-				//Progress counter in steps of 5%
-				const int progress = ++frameCount * 100 / FRAME_COUNT;
-				if (progress % 5 == 0 && progress / 5 != lastProgressCP)
-				{
-					lastProgressCP = progress / 5;
-					std::cout << progress << "%\n";
-				}
+			//progress counter in steps of 5%
+			const int progress = ++current_frame * 100 / input_frame_count;
+			if (progress % 5 == 0 && progress / 5 != progress_checkpoint) {
+				progress_checkpoint = progress / 5;
+				std::cout << progress << "%" << std::endl;
 			}
 		}
-		cam.release();
-		videowriter.release();	
-		return 0;
+		video_writer.release();	
 	}
+	video_capture.release();
+	return 0;
 }
