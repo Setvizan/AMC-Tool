@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31402.337
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AMC-Tool", "AMC-Tool.vcxproj", "{959C014C-445D-46DD-B62C-B1D141250696}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{959C014C-445D-46DD-B62C-B1D141250696}.Debug|x64.ActiveCfg = Debug|x64
+		{959C014C-445D-46DD-B62C-B1D141250696}.Debug|x64.Build.0 = Debug|x64
+		{959C014C-445D-46DD-B62C-B1D141250696}.Debug|x86.ActiveCfg = Debug|Win32
+		{959C014C-445D-46DD-B62C-B1D141250696}.Debug|x86.Build.0 = Debug|Win32
+		{959C014C-445D-46DD-B62C-B1D141250696}.Release|x64.ActiveCfg = Release|x64
+		{959C014C-445D-46DD-B62C-B1D141250696}.Release|x64.Build.0 = Release|x64
+		{959C014C-445D-46DD-B62C-B1D141250696}.Release|x86.ActiveCfg = Release|Win32
+		{959C014C-445D-46DD-B62C-B1D141250696}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF0A6424-4791-4D16-96C9-1659EA06D91E}
+	EndGlobalSection
+EndGlobal
