@@ -8,3 +8,8 @@ The Tool should be able to convert a regular .mp4 to a "ascified" .mp4.<br>
 -----------------------------------------------------------------
 Credits: <br>
 Name idea: [Florian Gubler](https://github.com/FlorianGubler)
+-----------------------------------------------------------------
+from [Setvizan](https://github.com/Setvizan/AMC-Tool)
+
+
+
