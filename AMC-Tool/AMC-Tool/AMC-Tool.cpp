@@ -24,6 +24,14 @@ const int character_size = 10;
 // font character size
 const double font_size = 0.4;
 
+// maximum input resolution
+const int max_input_height = 1080;
+const int max_input_width = 1920;
+
+// recommended input resolution
+const int recommend_input_height = 720;
+const int recommend_input_width = 1280;
+
 
 cv::Mat convert_frame(const cv::Mat frame) {
 	cv::String character_map[10] = { " ", ".", ":", "-", "=", "+", "*", "#", "%", "@" }; // not const because of qualification
@@ -51,33 +59,49 @@ cv::Mat convert_frame(const cv::Mat frame) {
 }
 
 
-bool validate(const std::string path) {
-	std::cout << "starting validation..." << std::endl;
-	if (path.empty()) {
-		std::cerr << "no arguments found usage: AMC-Tool PATH/TO/FILE" << std::endl;
-		return false;
-	} else if (!std::filesystem::exists(path)) {
+bool validate_path(const std::string path) {
+	std::cout << "finding file..." << std::endl;
+	if (!std::filesystem::exists(path)) {
 		std::cerr << "file does not exist!" << std::endl;
 		return false;
 	} else if (std::filesystem::path(path).extension() != ".mp4") {
 		std::cerr << "wrong file type! (use .mp4)\n";
 		return false;
 	} else {
-		std::cout << "validation complete!" << std::endl;
+		std::cout << "file found!" << std::endl;
 		return true;
 	}
-	
+}
+
+bool validate_resolution(const int height, const int width) {
+	std::cout << "checking resolution..." << std::endl;
+	if (height > max_input_height || width > max_input_width) {
+		std::cerr << "ERROR: File to large! recommended: 720p or lower" << std::endl;
+		return false;
+	} else if (height > recommend_input_height || width > recommend_input_width) {
+		std::cout << "WARNING: High resolution found! recommended: 720p or lower" << std::endl;
+		return true;
+	} else { 
+		std::cout << "checking complete!" << std::endl;
+		return true; 
+	}
 }
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 	// silent logs - opencv infos for external libraries
 	cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
-	if (!validate(argv[1])) { return -1; }
+	if (argc != 2) {
+		std::cerr << "invalid argument found, usage : AMC-Tool PATH/TO/FILE" << std::endl;
+		return -1;
+	}
+	if (!validate_path(argv[1]))
+		return -1;
+
 	const std::string path = argv[1];
 	const std::string new_filename = std::filesystem::path(argv[1]).stem().string() + "_ascii.mp4";
 	const std::string output_path = std::filesystem::path(argv[1]).replace_filename(new_filename).string();
-	std::cout << output_path << std::endl;
+	
 	int current_frame = 1;
 	int progress_checkpoint = 0;
 
@@ -87,6 +111,7 @@ int main(int argc, char *argv[]) {
 		video_capture.release();
 		return -1;
 	}
+
 	if (video_capture.isOpened()) {
 		// input information variables
 		int input_frame_count = video_capture.get(cv::CAP_PROP_FRAME_COUNT);
@@ -104,11 +129,16 @@ int main(int argc, char *argv[]) {
 		// read variables
 		cv::Mat frame;
 		
+		// check resolution
+		if (!validate_resolution(input_frame_height, input_frame_width))
+			return -1;
+
 		// output for clarity
-		std::cout << "FRAME_COUNT : " << input_frame_count << "\n";
-		std::cout << "FRAME_WIDTH : " << input_frame_width << "\n";
-		std::cout << "FRAME_HEIGHT : " << input_frame_height << "\n";
-		std::cout << "NEW FILE RESOLUTION: " << output_frame_size.height << "x" << output_frame_size.width << "\n";
+		std::cout << "FRAME_COUNT : " << input_frame_count << std::endl;
+		std::cout << "FRAME_WIDTH : " << input_frame_width << std::endl;
+		std::cout << "FRAME_HEIGHT : " << input_frame_height << std::endl;
+		std::cout << "NEW_FILE_RESOLUTION : " << output_frame_size.width << "x" << output_frame_size.height << std::endl;
+		std::cout << "NEW_FILE_LOCATION :" << output_path << std::endl;
 
 		cv::VideoWriter video_writer;
 		if (!video_writer.open(output_path, fourcc, fps, output_frame_size, true)) {
