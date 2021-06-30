@@ -10,4 +10,4 @@ Credits: <br>
 Name idea: [Florian Gubler](https://github.com/FlorianGubler) <br>
 
 -----------------------------------------------------------------
-from [Setvizan](https://github.com/Setvizan/AMC-Tool)
+from [Setvizan](https://github.com/Setvizan/)
