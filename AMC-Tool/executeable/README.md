@@ -1,11 +1,11 @@
 ~ AMC-Tool ~ <br>
 extract the .zip file.<br>
-Inside there are 3 files: <br>
+Inside there are multiple files, such as: <br>
 - AMC-Tool.exe
-- opencv_world452.dll
 - openh264-1.8.0-win64.dll
+- various OpenCV binary files for x64.
 
-the two dll are required for this application to work, i was unable to include them into the static build of the executable.<br>
+the files are required since i wasn't able to compile the opencv binary files into the AMC-Tool.exe <br>
 
 Don't forget this is a CLI application!
 
