@@ -1,13 +1,13 @@
-# AMC-Tool
-###### AMC-Tool meaning Ascii Movie Conversion Tool
+# ASCII-movie-converter
 
-This is a small project to finish my first year in my apprenticeship in computer science. <br>
-I chose to use the OpenCV Library together with C++ to realize my Idea.<br>
-The Tool should be able to convert a regular .mp4 to a "ascified" .mp4.<br>
+development branch <br>
+Not Optimal: 
+- Currently per frame linear increase in time needed to convert movie
+- No sound
 
------------------------------------------------------------------
-Credits: <br>
-Name idea: [Florian Gubler](https://github.com/FlorianGubler) <br>
+Ideas for optimizing:
+- Using Threads to increase speed
+- FFMPEG for sound
 
------------------------------------------------------------------
-from [Setvizan](https://github.com/Setvizan/)
+
+NOTE: openh264 library must be in directory with .exe for the program to work. Needed file Version 1.8.0 x64 [Download Here](https://github.com/cisco/openh264/releases)

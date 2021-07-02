@@ -134,8 +134,7 @@ int main(int argc, char* argv[]) {
 			video_capture.release();
 			return -1;
 		}
-			
-
+    
 		// output for clarity
 		std::cout << "FRAME_COUNT : " << input_frame_count << std::endl;
 		std::cout << "FRAME_WIDTH : " << input_frame_width << std::endl;
