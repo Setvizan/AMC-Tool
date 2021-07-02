@@ -130,9 +130,11 @@ int main(int argc, char* argv[]) {
 		cv::Mat frame;
 		
 		// check resolution
-		if (!validate_resolution(input_frame_height, input_frame_width))
+		if (!validate_resolution(input_frame_height, input_frame_width)) {
+			video_capture.release();
 			return -1;
-
+		}
+			
 		// output for clarity
 		std::cout << "FRAME_COUNT : " << input_frame_count << std::endl;
 		std::cout << "FRAME_WIDTH : " << input_frame_width << std::endl;
