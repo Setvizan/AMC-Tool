@@ -1,4 +1,4 @@
-~ AMC-Tool ~
+~ AMC-Tool ~ <br>
 extract the .zip file.<br>
 Inside there are 3 files: <br>
 - AMC-Tool.exe
